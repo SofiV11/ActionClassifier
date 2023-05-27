@@ -6,6 +6,8 @@ Please download the data from
 * Google driver: https://drive.google.com/open?id=1V8rQ5QR5q5zn1NHJhhf-6xIeDdXVtYs9
 * or Baidu Cloud: https://pan.baidu.com/s/11M2isbEQnBTQHT3-634AHw
 
+
+
 Unzip the data and you will see the folder: `source_images3`. Use it to replace the `data/source_images3`.
 
 Inside the folder, there is a `valid_images.txt`, which describes the label of each image that I used for training. (For your conviniene, I've included it in this repo, and you can view it at [data/source_images3/valid_images.txt](source_images3/valid_images.txt).)
@@ -58,3 +60,22 @@ Inside the folder, there is a `valid_images.txt`, which describes the label of e
   wave| 1239|  
   sit| 1908|  
   stand| 1703|  
+
+
+
+3. Download RGB archives from the following third-party repositories:
+    * [IXMAS Dataset](https://www.epfl.ch/labs/cvlab/data/data-ixmas10)
+        * Download "original IXMAS ROIs" archive
+        * Save the archive into data/data_out/ixmas/
+    * [Weizmann Dataset](http://www.wisdom.weizmann.ac.il/~vision/SpaceTimeActions.html)
+        * Download actions: Walk, Run, Jump, Bend, One-hand wave, Two-hands wave, Jump in place
+        * Save the archives into data/data_out/weizmann/
+    * [ISLD Dataset](https://doi.org/10.25405/data.ncl.14061806.v1)
+        * Download archive
+        * Save the archive into data/data_out/isld/
+    * [ISLD-Additional-Sequences Dataset](https://drive.google.com/file/d/1L1AvAP56fUwHQO6QvRGuYxfAHllw5PLe/view?usp=sharing)
+        * Download archive
+        * Save the archive into data/data_out/isldas/
+    * [UTKinect-Action3D Dataset](http://cvrc.ece.utexas.edu/KinectDatasets/HOJ3D.html)
+        * Download archive (RGB images only)
+        * Save the archive into data/data_out/utkinect/
