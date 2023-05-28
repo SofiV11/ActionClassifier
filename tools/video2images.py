@@ -23,14 +23,16 @@ import csv
 import glob
 import argparse
 import itertools
-ROOT = os.path.dirname(os.path.abspath(__file__))+"/"
+ROOT = os.path.dirname(os.path.abspath(__file__))[:-5]
 
 
 def parse_args():
+    input_video_path = ROOT+'data\\data_in\\isldas_federico_hands-clap_181.avi'
+    output_folder_path = ROOT+'data\\data_out\\'
     parser = argparse.ArgumentParser(
         description="Convert a folder of images into a video.")
-    parser.add_argument("-i", "--input_video_path", type=str, required=True)
-    parser.add_argument("-o", "--output_folder_path", type=str, required=True)
+    parser.add_argument("-i", "--input_video_path", type=str, required=False, default=input_video_path) #default=ROOT+'\\data\\data_in\\'
+    parser.add_argument("-o", "--output_folder_path", type=str, required=False, default=output_folder_path) #default =ROOT+'\\data\\data_out\\'
     parser.add_argument("-s", "--sample_interval", type=int, required=False,
                         default=1,
                         help="Sample every nth video frame to save to folder. Default 1.")
@@ -38,6 +40,7 @@ def parse_args():
                         default=100000,
                         help="Max number of video frames to save to folder. Default 1e5")
     args = parser.parse_args()
+
     return args
 
 
@@ -124,7 +127,7 @@ def main(args):
         os.makedirs(args.output_folder_path)
 
     def set_output_filename(i):
-        return args.output_folder_path + "/" + "{:08d}".format(i) + ".jpg"
+        return args.output_folder_path + "{:08d}".format(i) + ".jpg"
 
     img_displayer = ImageDisplayer()
     cnt_img = 0

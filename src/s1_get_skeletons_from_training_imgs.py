@@ -86,45 +86,20 @@ if True:
     OPENPOSE_IMG_SIZE = cfg["openpose"]["img_size"]
 
 
-def reduce_fps(video):
+def cut_video_data(video):
     # Настройка файла
-    dir = ROOT[:-7] + 'data\\data_in'
+    import tools.video2images as video2images
+    input_dir = ROOT[:-7] + 'data\\data_in\\'
+    output_dir = ROOT[:-7] + 'data\\data_out\\'
 
-    for filename in os.listdir(dir):
+
+    for filename in os.listdir(input_dir):
         # videoFile = dir +  filename# r"D:\274.avi"  # Путь к файлу
-        vide_file = os.path.join(dir, filename)
-        vidcap = cv2.VideoCapture(vide_file)
-        success, image = vidcap.read()
-
-        seconds = 0.1  # время
-        fps = vidcap.get(cv2.CAP_PROP_FPS)  # Получаем кадры в секунду
-        multiplier = fps * seconds
-
-        while success:
-          frameId = int(round(vidcap.get(1)))  # текущий номер кадра, округленный
-          success, image = vidcap.read()
-
-        if frameId % multiplier == 0:
-            cv2.imwrite(r"C:\Users\321\frame%d.jpg" % frameId, image)
-
-        vidcap.release()
-        print("Завершено")
-        frames = r'C:\Users\321'
-        frames = [os.path.join(frames, 'frame{}.jpg'.format(i)) for i in
-              range(5, 3750)]  # Путь к скриншотам. Нужно указать начальный номер кадра и конечный.
-        frame = cv2.imread(frames[0])
-        writer = cv2.VideoWriter(
-        '274.mp4',
-        cv2.VideoWriter_fourcc(*'MJPG'),  # кодек
-        25.0,  # fps
-        (frame.shape[1], frame.shape[0]),  # ширина, высота кадра
-        isColor=len(frame.shape) > 2)
+        video_file = os.path.join(dir, filename)
+        subdir_name = filename[:filename.find('_')[1]]
+        os.mkdir(output_dir+"folder")
 
 
-        for frame in map(cv2.imread, frames):
-            writer.write(frame)
-        writer.release()
-        cv2.destroyAllWindows()
 
 
 

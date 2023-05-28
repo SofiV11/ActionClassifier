@@ -88,7 +88,40 @@ def reduce_fps2(filename):
 
 
 
+def cut_video_data():
+    # Настройка файла
+    import tools.video2images as video2images
+    input_dir = ROOT + '\\data_in\\'
+    output_dir = ROOT + '\\data_out\\'
+
+
+    for filename in os.listdir(input_dir):
+        # videoFile = dir +  filename# r"D:\274.avi"  # Путь к файлу
+        video_file = os.path.join(input_dir, filename)
+        start_p = filename.find('_', filename.find('_')+1)
+        end_p = filename.find('_', start_p+1)
+        act_name = filename[start_p+1:end_p]
+        if act_name == 'wave1':
+            act_name = 'hello'
+
+        if act_name == 'wave2':
+            act_name = 'wave'
+
+        if act_name == 'sit-down':
+            act_name = 'sit'
+
+        if act_name == 'standing':
+            act_name = 'stand'
+
+        if act_name == 'box':
+            act_name = 'punch'
+
+        subdir_name = act_name+'_'+'03'
+        os.mkdir(output_dir+subdir_name)
+
+
+
 
 if __name__ == "__main__":
      # reduce_fps(10)
-     reduce_fps2('isldas_federico_hands-clap_181.avi')
+     cut_video_data()
