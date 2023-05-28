@@ -1,0 +1,19 @@
+  'bend' +
+, 'jump' +
+, 'pjump' +
+, 'run' +
+, 'walk' +
+, 'wave1== hello' +
+, 'wave2 == wave' +
+, 'check-watch' +
+, 'scratch-head' +
+, 'cross-arms' +
+, 'hands-clap' + 
+, 'sit-down' = sit +
+, 'get-up'+ 
+, 'standing' == stand +
+, 'kick' +
+, 'turn' + 
+, 'box' == box + 
+, 'pick-up'
+, 'point'
