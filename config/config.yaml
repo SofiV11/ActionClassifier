@@ -7,9 +7,9 @@
 
 classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch', 'wave']
 #classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch',
-           'wave', 'bend', 'scratch-head', 'pjump', 'hello', 'check-watch',
-           'scratch-head', 'cross-arms', 'hands-clap', 'get-up', 'turn', 'pick-up',
-           'point']
+#           'wave', 'bend', 'scratch-head', 'pjump', 'hello', 'check-watch',
+#           'scratch-head', 'cross-arms', 'hands-clap', 'get-up', 'turn', 'pick-up',
+#           'point']
 #classes: ['lying', 'other', 'sitting', 'standing']
 
 image_filename_format: "{:05d}.jpg"

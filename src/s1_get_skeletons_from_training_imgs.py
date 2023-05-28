@@ -35,18 +35,18 @@ Output:
 import cv2
 import yaml
 
-if True:  # Include project path
-    import sys
-    import os
+  # Include project path
+import sys
+import os
 
-    ROOT = os.path.dirname(os.path.abspath(__file__)) + "/../"
-    CURR_PATH = os.path.dirname(os.path.abspath(__file__)) + "/"
-    sys.path.append(ROOT)
+ROOT = os.path.dirname(os.path.abspath(__file__))[:-3]
+CURR_PATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(ROOT)
 
-    from utils.lib_openpose import SkeletonDetector
-    from utils.lib_tracker import Tracker
-    from utils.lib_skeletons_io import ReadValidImagesAndActionTypesByTxt
-    import utils.lib_commons as lib_commons
+from utils.lib_openpose import SkeletonDetector
+from utils.lib_tracker import Tracker
+from utils.lib_skeletons_io import ReadValidImagesAndActionTypesByTxt
+import utils.lib_commons as lib_commons
 
 
 def par(path):  # Pre-Append ROOT to the path if it's not absolute
@@ -56,7 +56,7 @@ def par(path):  # Pre-Append ROOT to the path if it's not absolute
 # -- Settings
 
 
-cfg_all = lib_commons.read_yaml(ROOT + "config/config.yaml")
+cfg_all = lib_commons.read_yaml(ROOT + "config\\config.yaml")
 cfg = cfg_all["s1_get_skeletons_from_training_imgs.py"]
 
 IMG_FILENAME_FORMAT = cfg_all["image_filename_format"]
