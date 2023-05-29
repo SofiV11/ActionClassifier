@@ -27,7 +27,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))[:-5]
 
 
 def parse_args():
-    input_video_path = ROOT+'data\\data_in\\isldas_federico_hands-clap_181.avi'
+    input_video_path = ROOT+'data\\data_in\\isld_karam_standing_577.avi'
     output_folder_path = ROOT+'data\\data_out\\'
     parser = argparse.ArgumentParser(
         description="Convert a folder of images into a video.")
@@ -69,7 +69,8 @@ class ReadFromVideo(object):
         return self.next_image is not None
 
     def get_curr_video_time(self):
-        return 1.0 / self.fps * self.cnt_imgs
+        imgs = 1.0 / self.fps * self.cnt_imgs
+        return imgs
 
     def read_image(self):
         image = self.next_image
@@ -123,13 +124,15 @@ def main(args):
 
     video_loader = ReadFromVideo(args.input_video_path)
 
-    if not os.path.exists(args.output_folder_path):
+    if not args.output_folder_path:
         os.makedirs(args.output_folder_path)
 
     def set_output_filename(i):
         return args.output_folder_path + "{:08d}".format(i) + ".jpg"
+        # return "{:08d}".format(i) + ".jpg"
 
-    img_displayer = ImageDisplayer()
+
+    # img_displayer = ImageDisplayer()
     cnt_img = 0
     for i in itertools.count():
         img = video_loader.read_image()
@@ -140,7 +143,7 @@ def main(args):
             cnt_img += 1
             print("Processing {}th image".format(cnt_img))
             cv2.imwrite(set_output_filename(cnt_img), img)
-            img_displayer.display(img)
+            # img_displayer.display(img)
             if cnt_img == args.max_frames:
                 print("Read {} frames. ".format(cnt_img) +
                       "Reach the max_frames setting. Stop.")

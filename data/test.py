@@ -1,6 +1,7 @@
 import cv2
 import yaml
 
+
 if True:  # Include project path
     import sys
     import os
@@ -87,12 +88,21 @@ def reduce_fps2(filename):
     output_video.release()
 
 
-
-def cut_video_data():
+import tools.video2images as video2images
+def merge_data():
     # Настройка файла
     import tools.video2images as video2images
     input_dir = ROOT + '\\data_in\\'
-    output_dir = ROOT + '\\data_out\\'
+    output_dir = ROOT + '\\data_out\\' # можно добавить в конфиг
+    existing_data_dir = ROOT + '\\source_images3\\' # можно взять из конфига
+
+    # Как мерджить данные, обзор содержимого папки с существующими данными, вырезать типы активности до знака "_", и дальше кидать аналогичное туда,
+    # а если класс действия из видео не подходит ни для одного действия из списка существующих, то создать новую папку
+    # (?) создать dict c действием и действием из внешних добавлемых данных
+    # (?) есть туева хуча видео, нужно по циклу пройтись по ним для анализа наличия действий, что можно закинуть в существующее место, новинки так называемые, \
+    # вычислить, создать для них папки и кидать туда кадры а как я уже запуталась пойду спать 
+    # (?) есть ли тайная задумка в названиях папок с файлами
+    #
 
 
     for filename in os.listdir(input_dir):
@@ -116,12 +126,44 @@ def cut_video_data():
         if act_name == 'box':
             act_name = 'punch'
 
-        subdir_name = act_name+'_'+'03'
-        os.mkdir(output_dir+subdir_name)
+        cnf = lib_commons.read_yaml(ROOT[:-5] + "\\config\\config.yaml")
+        classes = cnf['classes']
+        try:
+            classes.index("" + act_name + "")
+            for e_folder in os.listdir(existing_data_dir):
+                if e_folder.find("" + act_name + "") >= 0:
+                    subdir_name = (existing_data_dir + e_folder)
+                    break
+
+
+        except:
+            subdir_name = act_name
+            # if not subdir_name:
+            #   os.mkdir(existing_data_dir + subdir_name)
+            if not os.path.exists(existing_data_dir + subdir_name):
+                os.makedirs(existing_data_dir + subdir_name)
+
+        # args = []
+        # args.append(input_video_path)
+        # args.append(existing_data_dir + subdir_name)
+        # args.append(1)
+        args = video2images.parse_args()
+        print (22)
+        args.input_video_path = input_dir + filename
+        print(11)
+        args.output_folder_path = existing_data_dir + subdir_name + '\\'
+        video2images.main(args)
+
+
+# пофиксить момент с существующими папками
+# пофиксить момент с интервалом в зависимости от продолжительности видео
+# пофиксить момент с валидным текстом в зависимости от интервала и продолжительности определить количество кадров и сложить их для одного типа движения или сделать вручную
+#
+#
 
 
 
 
 if __name__ == "__main__":
      # reduce_fps(10)
-     cut_video_data()
+     merge_data()
