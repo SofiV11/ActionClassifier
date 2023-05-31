@@ -5,15 +5,18 @@
 #     In src/s2_put_skeleton_txts_to_a_single_txt.py,
 #     The image whose label is not in `classes` will be filtered out. 
 
-classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch', 'wave']
-#classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch',
-#           'wave', 'bend', 'scratch-head', 'pjump', 'hello', 'check-watch',
-#           'scratch-head', 'cross-arms', 'hands-clap', 'get-up', 'turn', 'pick-up',
-#           'point']
+#classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch', 'wave']
+classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch',
+           'wave', 'bend', 'scratch-head', 'hello', 'check-watch',
+           'scratch-head', 'cross-arms', 'hands-clap', 'get-up', 'turn', 'pick-up',
+           'point']
 #classes: ['lying', 'other', 'sitting', 'standing']
 
-image_filename_format: "{:05d}.jpg"
-skeleton_filename_format: "{:05d}.txt"
+#image_filename_format: "{:05d}.jpg"
+image_filename_format: "{:d}.jpg"
+#skeleton_filename_format: "{:05d}.txt"
+skeleton_filename_format: "{:d}.txt"
+img_size: 656x368
 
 features:
   window_size: 5 # Number of adjacent frames for extracting features. 

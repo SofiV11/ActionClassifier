@@ -19,8 +19,8 @@ import collections
 if True:  # Include project path
     import sys
     import os
-    ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
-    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"/"
+    ROOT = os.path.dirname(os.path.abspath(__file__))[:-3]
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))+"\\"
     sys.path.append(ROOT)
 
     # import utils.lib_feature_proc # This is no needed,

@@ -33,7 +33,7 @@ NaN = 0  # `Not A Number`, which is the value for invalid data.
 
 def get_training_imgs_info(
         valid_images_txt,
-        img_filename_format="{:05d}.jpg"):
+        img_filename_format="{:d}.jpg"):
     '''
     Arguments:
         valid_images_txt {str}: path of the txt file that 
@@ -102,7 +102,7 @@ class ReadValidImagesAndActionTypesByTxt(object):
     '''
 
     def __init__(self, img_folder, valid_imgs_txt,
-                 img_filename_format="{:05d}.jpg"):
+                 img_filename_format="{:d}.jpg"):
         '''
         Arguments:
             img_folder {str}: A folder that contains many sub folders.

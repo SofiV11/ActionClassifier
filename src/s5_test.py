@@ -81,9 +81,9 @@ def get_command_line_arguments():
             "(1) a video, (2) a folder of images, (3) or web camera.")
         parser.add_argument("-m", "--model_path", required=False,
                             default='model/trained_classifier.pickle')
-        parser.add_argument("-t", "--data_type", required=False, default='video',
+        parser.add_argument("-t", "--data_type", required=False, default='webcam',
                             choices=["video", "folder", "webcam"])
-        parser.add_argument("-p", "--data_path", required=False, default="data_test/exercise.avi",
+        parser.add_argument("-p", "--data_path", required=False, default="",
                             help="path to a video file, or images folder, or webcam. \n"
                             "For video and folder, the path should be "
                             "absolute or relative to this project's root. "

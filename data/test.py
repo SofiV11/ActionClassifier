@@ -1,6 +1,4 @@
 import cv2
-import yaml
-
 
 if True:  # Include project path
     import sys
@@ -10,9 +8,9 @@ if True:  # Include project path
     CURR_PATH = os.path.dirname(os.path.abspath(__file__)) + "/"
     sys.path.append(ROOT)
 
-    from utils.lib_openpose import SkeletonDetector
-    from utils.lib_tracker import Tracker
-    from utils.lib_skeletons_io import ReadValidImagesAndActionTypesByTxt
+    # from utils.lib_openpose import SkeletonDetector
+    # from utils.lib_tracker import Tracker
+    # from utils.lib_skeletons_io import ReadValidImagesAndActionTypesByTxt
     import utils.lib_commons as lib_commons
 
 
@@ -107,7 +105,7 @@ def merge_data():
 
     for filename in os.listdir(input_dir):
         # videoFile = dir +  filename# r"D:\274.avi"  # Путь к файлу
-        video_file = os.path.join(input_dir, filename)
+        # video_file = os.path.join(input_dir, filename)
         start_p = filename.find('_', filename.find('_')+1)
         end_p = filename.find('_', start_p+1)
         act_name = filename[start_p+1:end_p]
@@ -126,44 +124,93 @@ def merge_data():
         if act_name == 'box':
             act_name = 'punch'
 
+        if act_name == 'pjump':
+            act_name = 'jump'
+
         cnf = lib_commons.read_yaml(ROOT[:-5] + "\\config\\config.yaml")
         classes = cnf['classes']
-        try:
-            classes.index("" + act_name + "")
-            for e_folder in os.listdir(existing_data_dir):
-                if e_folder.find("" + act_name + "") >= 0:
-                    subdir_name = (existing_data_dir + e_folder)
-                    break
+        # try:
+        #     # classes.index("" + act_name + "")
+        #     for e_folder in os.listdir(existing_data_dir):
+        #         if e_folder.find("" + act_name + "") >= 0:
+        #             subdir_name = (existing_data_dir + e_folder)
+        #             break
+        # except:
+        #     subdir_name = existing_data_dir + act_name
+        #     # if not subdir_name:
+        #     #   os.mkdir(existing_data_dir + subdir_name)
+        #     if not os.path.exists(existing_data_dir + subdir_name):
+        #         os.makedirs(existing_data_dir + subdir_name)
 
-
-        except:
-            subdir_name = act_name
+        subdir_name = ''
+        for e_folder in os.listdir(existing_data_dir):
+            if e_folder.find("" + act_name + "") >= 0:
+                subdir_name = (existing_data_dir + e_folder)
+                break
+        if not subdir_name:
+            subdir_name = existing_data_dir + act_name
             # if not subdir_name:
             #   os.mkdir(existing_data_dir + subdir_name)
-            if not os.path.exists(existing_data_dir + subdir_name):
-                os.makedirs(existing_data_dir + subdir_name)
+            if not os.path.exists(subdir_name):
+                os.makedirs(subdir_name)
 
-        # args = []
-        # args.append(input_video_path)
-        # args.append(existing_data_dir + subdir_name)
-        # args.append(1)
         args = video2images.parse_args()
-        print (22)
         args.input_video_path = input_dir + filename
-        print(11)
-        args.output_folder_path = existing_data_dir + subdir_name + '\\'
+        args.output_folder_path = subdir_name + '\\'
         video2images.main(args)
 
 
-# пофиксить момент с существующими папками
-# пофиксить момент с интервалом в зависимости от продолжительности видео
+# пофиксить момент с существующими папками ------- ----------------------вроде ок
+# пофиксить момент с интервалом в зависимости от продолжительности видео ------хз но вроде ок
 # пофиксить момент с валидным текстом в зависимости от интервала и продолжительности определить количество кадров и сложить их для одного типа движения или сделать вручную
 #
 #
 
+def rename_file1(dir, start=0):
+    cfg_all = lib_commons.read_yaml(ROOT[:-4] + "config\\config.yaml")
+    image_format = cfg_all["image_filename_format"]
+    files = []
+    files = os.listdir(dir)
+    files.sort()
+    if start != 0:
+        start = int(max(os.listdir(dir)).split('.')[0])
+    for i in files:
+        os.rename(dir + '/' + i,
+                  (dir + '/' + image_format.format(int(i.split('.')[0])+100000)))
+    files.sort()
+    j=0
+    for i in files:
+        j=j+1
+        os.rename(dir + '/' + i,
+                  (dir + '/' + image_format.format(j)))
+        files.sort()
 
+
+def rename_file(dir, start=0):
+    cfg_all = lib_commons.read_yaml(ROOT[:-4] + "config\\config.yaml")
+    image_format = cfg_all["image_filename_format"]
+    files = []
+    files = os.listdir(dir)
+    files.sort()
+    if start != 0:
+        start = int(max(os.listdir(dir)).split('.')[0])
+    for i in files:
+        os.rename(dir + '/' + i,
+                  (dir + '/' + image_format.format(int(i.split('.')[0]))))
+        files.sort()
 
 
 if __name__ == "__main__":
-     # reduce_fps(10)
+
+     path = 'E:/pythonProject/Realtime-Action-Recognition/data/source_images3/'
+     pathlist = os.listdir(path)
+     for direct in pathlist:
+         rename_file(path+direct, 0)
+
      merge_data()
+
+     path = 'E:/pythonProject/Realtime-Action-Recognition/data/source_images3/'
+     pathlist = os.listdir(path)
+     for direct in pathlist:
+         rename_file1(path+direct, 0)
+

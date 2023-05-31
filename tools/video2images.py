@@ -23,8 +23,16 @@ import csv
 import glob
 import argparse
 import itertools
-ROOT = os.path.dirname(os.path.abspath(__file__))[:-5]
+import utils.lib_commons as lib_commons
+import imutils
 
+
+ROOT = os.path.dirname(os.path.abspath(__file__))[:-5]
+VALID_ING_TXT = os.path.dirname(os.path.abspath(__file__))[:-5] + "\\data\\source_images3\\valid_images.txt"
+cfg_all = lib_commons.read_yaml(ROOT + "config\\config.yaml")
+cfg_img_size = cfg_all['img_size'].split('x')
+img_h = int(cfg_img_size[0])
+img_w = int(cfg_img_size[1])
 
 def parse_args():
     input_video_path = ROOT+'data\\data_in\\isld_karam_standing_577.avi'
@@ -121,24 +129,40 @@ class ImageDisplayer(object):
 
 
 def main(args):
-
     video_loader = ReadFromVideo(args.input_video_path)
 
     if not args.output_folder_path:
         os.makedirs(args.output_folder_path)
 
     def set_output_filename(i):
-        return args.output_folder_path + "{:08d}".format(i) + ".jpg"
+        s = get_max_frame()
+        return args.output_folder_path + str(s + i) + ".jpg"
         # return "{:08d}".format(i) + ".jpg"
 
+    def get_max_frame():
+        if len(os.listdir(args.output_folder_path)) == 0:
+            return 0
+        else:
+            f = []
+            for filename in os.listdir(args.output_folder_path):
+                val = int(filename.split('.')[0])
+                f.append(val)
+            s = max(f)
+            return s
 
     # img_displayer = ImageDisplayer()
     cnt_img = 0
+    # print(video_loader.get_curr_video_time())
+    # print(video_loader.get_fps())
+    # print(video_loader.get_curr_video_time())
+
+    s = get_max_frame()
     for i in itertools.count():
         img = video_loader.read_image()
         if img is None:
             print("Have read all frames from the video file.")
             break
+        img = imutils.resize(img, width=img_w, height=img_h)
         if i % args.sample_interval == 0:
             cnt_img += 1
             print("Processing {}th image".format(cnt_img))
@@ -148,6 +172,12 @@ def main(args):
                 print("Read {} frames. ".format(cnt_img) +
                       "Reach the max_frames setting. Stop.")
                 break
+
+    # with open(VALID_ING_TXT, "a") as file:
+    #     for line in file:
+    #         if ,,,,, in line:
+    #             file.write()
+
 
 
 if __name__ == "__main__":

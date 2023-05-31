@@ -40,7 +40,7 @@ import sys
 import os
 
 ROOT = os.path.dirname(os.path.abspath(__file__))[:-3]
-CURR_PATH = os.path.dirname(os.path.abspath(__file__))
+CURR_PATH = os.path.dirname(os.path.abspath(__file__))+'\\'
 sys.path.append(ROOT)
 
 from utils.lib_openpose import SkeletonDetector
@@ -108,13 +108,14 @@ class ImageDisplayer(object):
 
     def __init__(self):
         self._window_name = "cv2_display_window"
-        cv2.namedWindow(self._window_name)
+        cv2.namedWindow(self._window_name, cv2.WINDOW_NORMAL)
 
-    def display(self, image, wait_key_ms=1):
+    def display(self, image, wait_key_ms=0):
         cv2.imshow(self._window_name, image)
         cv2.waitKey(wait_key_ms)
 
     def __del__(self):
+
         cv2.destroyWindow(self._window_name)
 
 
@@ -129,10 +130,11 @@ if __name__ == "__main__":
     images_loader = ReadValidImagesAndActionTypesByTxt(
         img_folder=SRC_IMAGES_FOLDER,
         valid_imgs_txt=SRC_IMAGES_DESCRIPTION_TXT,
-        img_filename_format=IMG_FILENAME_FORMAT)
+        img_filename_format=IMG_FILENAME_FORMAT
+    )
     # This file is not used.
     images_loader.save_images_info(filepath=DST_IMAGES_INFO_TXT)
-    img_displayer = ImageDisplayer()
+    # img_displayer = ImageDisplayer()
 
     # -- Init output path
     os.makedirs(os.path.dirname(DST_IMAGES_INFO_TXT), exist_ok=True)
@@ -151,7 +153,7 @@ if __name__ == "__main__":
         # -- Draw
         img_disp = img.copy()
         skeleton_detector.draw(img_disp, humans)
-        img_displayer.display(img_disp, wait_key_ms=1)
+        # img_displayer.display(img_disp, wait_key_ms=1)
 
         # -- Get skeleton data and save to file
         skeletons, scale_h = skeleton_detector.humans_to_skels_list(humans)
