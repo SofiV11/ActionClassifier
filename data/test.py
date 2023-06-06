@@ -1,9 +1,10 @@
 import cv2
-
+import tensorflow as tf
 if True:  # Include project path
     import sys
     import os
 
+    ROOT0 = os.path.dirname(os.path.abspath(__file__))[:-4]
     ROOT = os.path.dirname(os.path.abspath(__file__))
     CURR_PATH = os.path.dirname(os.path.abspath(__file__)) + "/"
     sys.path.append(ROOT)
@@ -12,7 +13,6 @@ if True:  # Include project path
     # from utils.lib_tracker import Tracker
     # from utils.lib_skeletons_io import ReadValidImagesAndActionTypesByTxt
     import utils.lib_commons as lib_commons
-
 
 
 def reduce_fps(path):
@@ -87,12 +87,14 @@ def reduce_fps2(filename):
 
 
 import tools.video2images as video2images
+
+
 def merge_data():
     # Настройка файла
     import tools.video2images as video2images
     input_dir = ROOT + '\\data_in\\'
-    output_dir = ROOT + '\\data_out\\' # можно добавить в конфиг
-    existing_data_dir = ROOT + '\\source_images3\\' # можно взять из конфига
+    output_dir = ROOT + '\\data_out\\'  # можно добавить в конфиг
+    existing_data_dir = ROOT + '\\source_images3\\'  # можно взять из конфига
 
     # Как мерджить данные, обзор содержимого папки с существующими данными, вырезать типы активности до знака "_", и дальше кидать аналогичное туда,
     # а если класс действия из видео не подходит ни для одного действия из списка существующих, то создать новую папку
@@ -102,13 +104,13 @@ def merge_data():
     # (?) есть ли тайная задумка в названиях папок с файлами
     #
 
-
     for filename in os.listdir(input_dir):
         # videoFile = dir +  filename# r"D:\274.avi"  # Путь к файлу
         # video_file = os.path.join(input_dir, filename)
-        start_p = filename.find('_', filename.find('_')+1)
-        end_p = filename.find('_', start_p+1)
-        act_name = filename[start_p+1:end_p]
+        # start_p = filename.find('_', filename.find('_')+1)
+        # end_p = filename.find('_', start_p+1)
+        # act_name = filename[start_p+1:end_p]
+        act_name = filename.split('_')[2]
         if act_name == 'wave1':
             act_name = 'hello'
 
@@ -141,18 +143,20 @@ def merge_data():
         #     #   os.mkdir(existing_data_dir + subdir_name)
         #     if not os.path.exists(existing_data_dir + subdir_name):
         #         os.makedirs(existing_data_dir + subdir_name)
+        #
+        # subdir_name = ''
+        # for e_folder in os.listdir(existing_data_dir):
+        # e_folder.find("" + act_name + "")
+        subdir_name = (existing_data_dir + act_name + '_03')
+        # if not subdir_name:
+        #     subdir_name = existing_data_dir + act_name
+        #     # if not subdir_name:
+        #     #   os.mkdir(existing_data_dir + subdir_name)
+        #     if not os.path.exists(subdir_name):
+        #         os.makedirs(subdir_name)
 
-        subdir_name = ''
-        for e_folder in os.listdir(existing_data_dir):
-            if e_folder.find("" + act_name + "") >= 0:
-                subdir_name = (existing_data_dir + e_folder)
-                break
-        if not subdir_name:
-            subdir_name = existing_data_dir + act_name
-            # if not subdir_name:
-            #   os.mkdir(existing_data_dir + subdir_name)
-            if not os.path.exists(subdir_name):
-                os.makedirs(subdir_name)
+        if not os.path.exists(subdir_name):
+            os.makedirs(subdir_name)
 
         args = video2images.parse_args()
         args.input_video_path = input_dir + filename
@@ -163,7 +167,7 @@ def merge_data():
 # пофиксить момент с существующими папками ------- ----------------------вроде ок
 # пофиксить момент с интервалом в зависимости от продолжительности видео ------хз но вроде ок
 # пофиксить момент с валидным текстом в зависимости от интервала и продолжительности определить количество кадров и сложить их для одного типа движения или сделать вручную
-#
+# дописать реализацию для записи в текстовый файл по клипам так называемым
 #
 
 def rename_file1(dir, start=0):
@@ -176,11 +180,11 @@ def rename_file1(dir, start=0):
         start = int(max(os.listdir(dir)).split('.')[0])
     for i in files:
         os.rename(dir + '/' + i,
-                  (dir + '/' + image_format.format(int(i.split('.')[0])+100000)))
+                  (dir + '/' + image_format.format(int(i.split('.')[0]) + 100000)))
     files.sort()
-    j=0
+    j = 0
     for i in files:
-        j=j+1
+        j = j + 1
         os.rename(dir + '/' + i,
                   (dir + '/' + image_format.format(j)))
         files.sort()
@@ -191,7 +195,7 @@ def rename_file(dir, start=0):
     image_format = cfg_all["image_filename_format"]
     files = []
     files = os.listdir(dir)
-    files.sort()
+    files = sorted(files)
     if start != 0:
         start = int(max(os.listdir(dir)).split('.')[0])
     for i in files:
@@ -202,15 +206,81 @@ def rename_file(dir, start=0):
 
 if __name__ == "__main__":
 
-     path = 'E:/pythonProject/Realtime-Action-Recognition/data/source_images3/'
-     pathlist = os.listdir(path)
-     for direct in pathlist:
-         rename_file(path+direct, 0)
+    # path = 'E:/pythonProject/Realtime-Action-Recognition/data/source_images3/'
+    # pathlist = os.listdir(path)
+    # for direct in pathlist:
+    #     rename_file(path+direct, 0)
 
-     merge_data()
+    merge = 0
 
-     path = 'E:/pythonProject/Realtime-Action-Recognition/data/source_images3/'
-     pathlist = os.listdir(path)
-     for direct in pathlist:
-         rename_file1(path+direct, 0)
+    if merge==1:
+        merge_data()
+
+
+    tens = 0
+
+    if tens==1:
+        # получение тензоров
+        img = cv2.imread('E:/pythonProject/Realtime-Action-Recognition/data/tst.jpg')
+        inputs = tf.get_default_graph().get_tensor_by_name('inputs:0')
+        heatmaps_tensor = tf.get_default_graph().get_tensor_by_name('Mconv7_stage6_L2/BiasAdd:0')
+        pafs_tensor = tf.get_default_graph().get_tensor_by_name('Mconv7_stage6_L1/BiasAdd:0')
+
+        while tf.Session():
+            heatmaps, pafs = tf.Session().run([heatmaps_tensor, pafs_tensor], feed_dict={inputs: img})
+        from scipy.ndimage.filters import maximum_filter
+
+    check_data = 0
+
+    if check_data==1:
+        inf_file = ROOT0 + 'data_proc\\raw_skeletons\\tmp\\images_info.txt'
+        # filepaths = lib_commons.get_filenames(inf_file,
+        #                                       use_sort=True, with_folder_path=True)
+        inf_file = lib_commons.read_listlist(inf_file)
+        dal_list = ['bend', 'bend', 'scratch-head', 'hello', 'check-watch',
+           'scratch-head', 'cross-arms', 'hands-clap', 'get-up', 'turn', 'pick-up',
+           'point']
+        for i in inf_file:
+            for j in dal_list:
+              if i[3] == j:
+                  del i
+
+
+
+
+
+
+
+    # part_candidates = heatmap
+
+    print(1)
+
+    # path = 'E:/pythonProject/Realtime-Action-Recognition/data/source_images3/'
+    # pathlist = os.listdir(path)
+    #
+    # for direct in pathlist:
+    #     print(direct + '\n' + '1 ' + str(len(os.listdir(path + direct))))
+    #     # rename_file(path + direct, 0)
+
+
+
+# print(os.listdir('E:/pythonProject/Realtime-Action-Recognition/data/source_images3/'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -34,6 +34,9 @@ cfg_img_size = cfg_all['img_size'].split('x')
 img_h = int(cfg_img_size[0])
 img_w = int(cfg_img_size[1])
 
+img_h = 656
+img_w = 480
+
 def parse_args():
     input_video_path = ROOT+'data\\data_in\\isld_karam_standing_577.avi'
     output_folder_path = ROOT+'data\\data_out\\'
@@ -136,7 +139,7 @@ def main(args):
 
     def set_output_filename(i):
         s = get_max_frame()
-        return args.output_folder_path + str(s + i) + ".jpg"
+        return args.output_folder_path + str(s + 1) + ".jpg"
         # return "{:08d}".format(i) + ".jpg"
 
     def get_max_frame():
@@ -160,18 +163,21 @@ def main(args):
     for i in itertools.count():
         img = video_loader.read_image()
         if img is None:
-            print("Have read all frames from the video file.")
+            #print("Have read all frames from the video file.")
             break
         img = imutils.resize(img, width=img_w, height=img_h)
         if i % args.sample_interval == 0:
             cnt_img += 1
-            print("Processing {}th image".format(cnt_img))
+            # print("Processing {}th image".format(cnt_img))
             cv2.imwrite(set_output_filename(cnt_img), img)
             # img_displayer.display(img)
             if cnt_img == args.max_frames:
                 print("Read {} frames. ".format(cnt_img) +
                       "Reach the max_frames setting. Stop.")
                 break
+
+    print(str(args.input_video_path.split('\\')[5].split('_')[2]) + ' ' + str(s+1) + ' ' + str(s+cnt_img))
+
 
     # with open(VALID_ING_TXT, "a") as file:
     #     for line in file:

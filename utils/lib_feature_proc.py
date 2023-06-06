@@ -43,6 +43,10 @@ def retrain_only_body_joints(skeleton):
     Also, you will need to write some extra code to 
     deal with the case when head joints are missing.
 
+    Все операции со скелетом в этом скрипте выполняются после этой функции.
+    Все суставы в голове удаляются, а шея становится 0-м суставом.
+
+
     '''
     return skeleton.copy()[2:2+13*2]
 
@@ -75,14 +79,14 @@ def extract_multi_frame_features(
     '''
     X_new = []
     Y_new = []
-    N = len(video_indices)
+    N = len(video_indices) #индексы клипов
 
     # Loop through all data
     for i, _ in enumerate(video_indices):
 
         # If a new video clip starts, reset the feature generator
         if i == 0 or video_indices[i] != video_indices[i-1]:
-            fg = FeatureGenerator(window_size, is_adding_noise)
+            fg = FeatureGenerator(window_size, is_adding_noise) # инициализация генератора итоговых характеристик действий
         
         # Get features
         success, features = fg.add_cur_skeleton(X[i, :])
@@ -183,10 +187,10 @@ class ProcFtr(object):
         elif y12 == NaN:
             x1, y1 = x11, y11
         else:
-            x1, y1 = (x11 + x12) / 2, (y11 + y12) / 2
+            x1, y1 = (x11 + x12) / 2, (y11 + y12) / 2 # середина между двумя точками
 
         # Get body height
-        height = ((x0-x1)**2 + (y0-y1)**2)**(0.5)
+        height = ((x0-x1)**2 + (y0-y1)**2)**(0.5) # вычисление расстояния
         return height
 
     @staticmethod
@@ -196,7 +200,7 @@ class ProcFtr(object):
         '''
         x = x.copy()
         px0, py0 = get_joint(x, NECK)
-        x[0::2] = x[0::2] - px0
+        x[0::2] = x[0::2] - px0 # каждая х координата уменьшается на х координату шеи
         x[1::2] = x[1::2] - py0
         return x
 
@@ -290,7 +294,7 @@ class FeatureGenerator(object):
         '''
         self._window_size = window_size
         self._is_adding_noise = is_adding_noise
-        self._noise_intensity = NOISE_INTENSITY
+        self._noise_intensity = NOISE_INTENSITY # 0.05
         self.reset()
 
     def reset(self):
@@ -308,7 +312,7 @@ class FeatureGenerator(object):
             features {np.array} 
         '''
 
-        x = retrain_only_body_joints(skeleton)
+        x = retrain_only_body_joints(skeleton) # ликвидация частей головы, после этого остается 26 значений, 13 точек
 
         if not ProcFtr.has_neck_and_thigh(x):
             self.reset()
@@ -325,6 +329,7 @@ class FeatureGenerator(object):
             x = np.array(x)
             # angles, lens = ProcFtr.joint_pos_2_angle_and_length(x) # deprecate
 
+            # двусвязный список, или коллекция двухсторонней очереди, постепенно добавляются наблюдения - скелеты
             # Push to deque
             self._x_deque.append(x)
             # self._angles_deque.append(angles) # deprecate
@@ -336,15 +341,15 @@ class FeatureGenerator(object):
             # -- Extract features
             if len(self._x_deque) < self._window_size:
                 return False, None
-            else:
+            else:  # как только очередь заполнится 5 наблюдениями, будем сюда проваливаться
                 # -- Normalize all 1~t features
-                h_list = [ProcFtr.get_body_height(xi) for xi in self._x_deque]
-                mean_height = np.mean(h_list)
+                h_list = [ProcFtr.get_body_height(xi) for xi in self._x_deque] # получаем список, состоящий из высоты скелетов для всех предыдущих наблюдений
+                mean_height = np.mean(h_list) # вычислили среднюю
                 xnorm_list = [ProcFtr.remove_body_offset(xi)/mean_height
-                              for xi in self._x_deque]
+                              for xi in self._x_deque] # из очереди берем каждый элемент- наблюдение, и делим на среднюю высоту - нормализация
 
                 # -- Get features of pose/angles/lens
-                f_poses = self._deque_features_to_1darray(xnorm_list)
+                f_poses = self._deque_features_to_1darray(xnorm_list) # сборище скелетов из окна (5 кадров окно)
                 # f_angles = self._deque_features_to_1darray(self._angles_deque) # deprecate
                 # f_lens = self._deque_features_to_1darray(
                 #     self._lens_deque) / mean_height # deprecate
@@ -373,7 +378,7 @@ class FeatureGenerator(object):
     def _compute_v_center(self, x_deque, step):
         vel = []
         for i in range(0, len(x_deque) - step, step):
-            dxdy = x_deque[i+step][0:2] - x_deque[i][0:2]
+            dxdy = x_deque[i+step][0:2] - x_deque[i][0:2] # из последующего вычитаем предыдущее значение 2х первых координат - шея
             vel += dxdy.tolist()
         return np.array(vel)
 
@@ -395,23 +400,23 @@ class FeatureGenerator(object):
         def get_px_py_px0_py0(x):
             px = x[0::2]  # list of x
             py = x[1::2]  # list of y
-            px0, py0 = get_joint(x, NECK)  # neck
+            px0, py0 = get_joint(x, NECK)  # координаты шеи, начальные
             return px, py, px0, py0
         cur_px, cur_py, cur_px0, cur_py0 = get_px_py_px0_py0(x)
-        cur_height = ProcFtr.get_body_height(x)
+        cur_height = ProcFtr.get_body_height(x) # получение расстояния между шеей и бедром
 
-        is_lack_knee = check_joint(x, L_KNEE) or check_joint(x, R_KNEE)
-        is_lack_ankle = check_joint(x, L_ANKLE) or check_joint(x, R_ANKLE)
+        is_lack_knee = check_joint(x, L_KNEE) or check_joint(x, R_KNEE) # есть ли координаты коленей
+        is_lack_ankle = check_joint(x, L_ANKLE) or check_joint(x, R_ANKLE) # есть ли лодыжки
         if (self._pre_x is None) or is_lack_knee or is_lack_ankle:
             # If preious data is invalid or there is no knee or ankle,
             # then fill the data based on the STAND_SKEL_NORMED.
             for i in range(TOTAL_JOINTS*2):
-                if res[i] == NaN:
+                if res[i] == NaN: # пропущенные значения - координаты, определяем икс или игрек это
                     res[i] = (cur_px0 if i % 2 == 0 else cur_py0) + \
                         cur_height * STAND_SKEL_NORMED[i]
             return res
 
-        pre_px, pre_py, pre_px0, pre_py0 = get_px_py_px0_py0(self._pre_x)
+        pre_px, pre_py, pre_px0, pre_py0 = get_px_py_px0_py0(self._pre_x) # данные берутся не из обрабатываемого списка , а из списка по предыдущему кадру
         pre_height = ProcFtr.get_body_height(self._pre_x)
 
         scale = cur_height / pre_height

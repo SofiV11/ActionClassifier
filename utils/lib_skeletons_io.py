@@ -194,12 +194,12 @@ def load_skeleton_data(filepath, classes):
         classes {list of string, len=C}:    The classes of all actions.
     '''
 
-    label2index = {c: i for i, c in enumerate(classes)}
+    label2index = {c: i for i, c in enumerate(classes)} # декодирование лейблов действий
 
     with open(filepath, 'r') as f:
 
         # Load data
-        dataset = simplejson.load(f)
+        dataset = simplejson.load(f) # операция обратная операциии dump, тут мы уже читаем этот файл(но зачем нужен был json, я не понимаю)
 
         # Remove bad data. A bad data is filled with zeros.
         def is_good_data(row):
@@ -209,7 +209,7 @@ def load_skeleton_data(filepath, classes):
         # Get skeleton data, which is in the pos [5, 41)
         # LEN_IMG_INFO = 5
         # LEN_SKELETON_XY = 36
-        X = np.array([row[LEN_IMG_INFO:LEN_IMG_INFO+LEN_SKELETON_XY]
+        X = np.array([row[LEN_IMG_INFO:LEN_IMG_INFO+LEN_SKELETON_XY] #[5:41]
                       for row in dataset])
 
         # row[1] is the video index of the image

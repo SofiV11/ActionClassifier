@@ -80,7 +80,7 @@ def get_length_of_one_skeleton_data(filepaths):
         if len(skeletons):
             skeleton = skeletons[IDX_PERSON]
             data_size = len(skeleton)
-            assert(data_size == 41)
+            assert(data_size == 41) #это инструкции, которые «утверждают» определенный кейс в программе
             return data_size
     raise RuntimeError(f"No valid txt under: {SRC_DETECTED_SKELETONS_FOLDER}.")
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     # -- Get skeleton filenames
     filepaths = lib_commons.get_filenames(SRC_DETECTED_SKELETONS_FOLDER,
-                                          use_sort=True, with_folder_path=True)
+                                          use_sort=True, with_folder_path=True) # получение списка абсолютных путей ко всем файлам в директории
     num_skeletons = len(filepaths)
 
     # -- Check data length of one skeleton
@@ -104,10 +104,10 @@ if __name__ == "__main__":
     for i in range(num_skeletons):
 
         # Read skeletons from a txt
-        skeletons = read_skeletons_from_ith_txt(i)
+        skeletons = read_skeletons_from_ith_txt(i) # возвращает элемент списка с данными по 1 скелету
         if not skeletons:  # If empty, discard this image.
             continue
-        skeleton = skeletons[IDX_PERSON]
+        skeleton = skeletons[IDX_PERSON] #IDX_PERSON - индекс позиции кол-ва скелетов = [0]
         label = skeleton[IDX_ACTION_LABEL]
         if label not in CLASSES:  # If invalid label, discard this image.
             continue
@@ -121,7 +121,7 @@ if __name__ == "__main__":
             print("{}/{}".format(i, num_skeletons))
 
     # -- Save to txt
-    with open(DST_ALL_SKELETONS_TXT, 'w') as f:
+    with open(DST_ALL_SKELETONS_TXT, 'w') as f: # режим записи, записываем в файл json данные
         simplejson.dump(all_skeletons, f)
 
     print(f"There are {len(all_skeletons)} skeleton data.")

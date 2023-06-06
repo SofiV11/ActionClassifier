@@ -6,10 +6,10 @@
 #     The image whose label is not in `classes` will be filtered out. 
 
 #classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch', 'wave']
-classes: ['stand', 'walk', 'run', 'jump', 'sit', 'squat', 'kick', 'punch',
+classes: ['stand', 'walk', 'run', 'jump', 'sit', 'kick', 'punch',
            'wave', 'bend', 'scratch-head', 'hello', 'check-watch',
-           'scratch-head', 'cross-arms', 'hands-clap', 'get-up', 'turn', 'pick-up',
-           'point']
+           'cross-arms', 'hands-clap', 'get-up', 'pick-up',
+           'point'] # убрала squat
 #classes: ['lying', 'other', 'sitting', 'standing']
 
 #image_filename_format: "{:05d}.jpg"

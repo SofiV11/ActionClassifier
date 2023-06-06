@@ -85,24 +85,6 @@ if True:
     OPENPOSE_MODEL = cfg["openpose"]["model"]
     OPENPOSE_IMG_SIZE = cfg["openpose"]["img_size"]
 
-
-def cut_video_data(video):
-    # Настройка файла
-    import tools.video2images as video2images
-    input_dir = ROOT[:-7] + 'data\\data_in\\'
-    output_dir = ROOT[:-7] + 'data\\data_out\\'
-
-
-    for filename in os.listdir(input_dir):
-        # videoFile = dir +  filename# r"D:\274.avi"  # Путь к файлу
-        video_file = os.path.join(dir, filename)
-        subdir_name = filename[:filename.find('_')[1]]
-        os.mkdir(output_dir+"folder")
-
-
-
-
-
 class ImageDisplayer(object):
     ''' A simple wrapper of using cv2.imshow to display image '''
 
@@ -143,12 +125,14 @@ if __name__ == "__main__":
 
     # -- Read images and process
     num_total_images = images_loader.num_images
+    # ГЛАВНЫЙ ЦИКЛ ПО КАДРАМ-ИЗОБРАЖЕНИЯМ
     for ith_img in range(num_total_images):
         # -- Read image
-        img, str_action_label, img_info = images_loader.read_image()
+        # прописать условие что надо начинать с кадра номер 12305 !!!!!
+        img, str_action_label, img_info = images_loader.read_image() # возвращает нампи массив изображения, лейбл действия, и элемент массива инфо
 
         # -- Detect
-        humans = skeleton_detector.detect(img)
+        humans = skeleton_detector.detect(img) # детектирование людей на изображении, возвращает класс
 
         # -- Draw
         img_disp = img.copy()
@@ -156,7 +140,9 @@ if __name__ == "__main__":
         # img_displayer.display(img_disp, wait_key_ms=1)
 
         # -- Get skeleton data and save to file
-        skeletons, scale_h = skeleton_detector.humans_to_skels_list(humans)
+        skeletons, scale_h = skeleton_detector.humans_to_skels_list(humans) # принимает класс-человека,
+        # возвращает скелет - список из 36 элементов (18 суставов * 2 значения координат)
+        # и результирующий диапазон высоты
         dict_id2skeleton = multiperson_tracker.track(
             skeletons)  # dict: (int human id) -> (np.array() skeleton)
         skels_to_save = [img_info + skeleton.tolist()
@@ -178,5 +164,8 @@ if __name__ == "__main__":
 
         print(f"{ith_img}/{num_total_images} th image "
               f"has {len(skeletons)} people in it")
+
+
+
 
     print("Program ends")
