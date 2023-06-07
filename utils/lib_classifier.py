@@ -56,16 +56,18 @@ class ClassifierOfflineTrain(object):
             processed by `class FeatureGenerator`.
     '''
 
-    def __init__(self):
-        self._init_all_models()
 
-        # self.clf = self._choose_model("Nearest Neighbors")
+    def __init__(self, model_name='MLP'):
+        self._init_all_models()
+        self._model_name = model_name
+
+        self.clf = self._choose_model(self._model_name)
         # self.clf = self._choose_model("Linear SVM")
         # self.clf = self._choose_model("RBF SVM")
         # self.clf = self._choose_model("Gaussian Process")
         # self.clf = self._choose_model("Decision Tree")
         # self.clf = self._choose_model("Random Forest")
-        self.clf = self._choose_model("Neural Net")
+        # self.clf = self._choose_model("Neural Net")
 
     def predict(self, X):
         ''' Predict the class index of the feature X '''
@@ -98,7 +100,7 @@ class ClassifierOfflineTrain(object):
 
     def _init_all_models(self):
         self.names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
-                      "Decision Tree", "Random Forest", "Neural Net", "AdaBoost",
+                      "Decision Tree", "Random Forest", "MLP", "AdaBoost",
                       "Naive Bayes", "QDA"]
         self.model_name = None
         self.classifiers = [
@@ -110,7 +112,7 @@ class ClassifierOfflineTrain(object):
             RandomForestClassifier(
                 max_depth=30, n_estimators=100, max_features="auto"),
             MLPClassifier((20, 30, 40)),  # Neural Net
-            AdaBoostClassifier(),
+            AdaBoostClassifier(base_estimator=SVC(gamma=0.01, C=1.0, verbose=True), n_estimators=100, algorithm='SAMME'),
             GaussianNB(),
             QuadraticDiscriminantAnalysis()]
 

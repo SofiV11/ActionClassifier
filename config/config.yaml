@@ -53,7 +53,7 @@ s4_train.py:
     processed_features: *features_x
     processed_features_labels: *features_y
   output:
-    model_path: model/trained_classifier.pickle
+    model_path: "model/trained_classifier_{}.pickle"
 
 s5_test.py:
   # Input:

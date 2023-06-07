@@ -70,8 +70,10 @@ def evaluate_model(model, classes, tr_X, tr_Y, te_X, te_Y):
     # Accuracy
     t0 = time.time()
 
+    print(f'Model name: {model.model_name}')
+
     tr_accu, tr_Y_predict = model.predict_and_evaluate(tr_X, tr_Y)
-    print(f"Accuracy on training set is {tr_accu}")
+    print(f"Accuracy on training set is {tr_accu}") # рассчитывается как доля правильных предсказаний
 
     te_accu, te_Y_predict = model.predict_and_evaluate(te_X, te_Y)
     print(f"Accuracy on testing set is {te_accu}")
@@ -112,7 +114,7 @@ def main():
 
     # -- Train the model
     print("\nStart training model ...")
-    model = ClassifierOfflineTrain()
+    model = ClassifierOfflineTrain(model_name='AdaBoost')
     model.train(tr_X, tr_Y)
 
     # -- Evaluate model
@@ -121,7 +123,7 @@ def main():
 
     # -- Save model
     print("\nSave model to " + DST_MODEL_PATH)
-    with open(DST_MODEL_PATH, 'wb') as f:
+    with open(DST_MODEL_PATH.format(model.model_name), 'wb') as f:
         pickle.dump(model, f)
 
 
