@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-''' 
-Load skeleton data from `skeletons_info.txt`, 
-process data, 
-and then save features and labels to .csv file.
+'''
+Загрузка данных о скелете из файла `skeletons_info.txt`,
+Обработка данных,
+Сохранение характеристик и метк в файл .csv.
 '''
 
 import numpy as np
@@ -21,34 +18,30 @@ if True:  # Include project path
     from utils.lib_feature_proc import extract_multi_frame_features
 
 
-def par(path):  # Pre-Append ROOT to the path if it's not absolute
+def par(path):
     return ROOT + path if (path and path[0] != "/") else path
-
-# -- Settings
-
 
 cfg_all = lib_commons.read_yaml(ROOT + "config/config.yaml")
 cfg = cfg_all["s3_preprocess_features.py"]
 
 CLASSES = np.array(cfg_all["classes"])
 
-# Action recognition
-WINDOW_SIZE = int(cfg_all["features"]["window_size"]) # number of frames used to extract features.
+# Распознавание действий
+WINDOW_SIZE = int(cfg_all["features"]["window_size"]) # количество кадров, используемых для извлечения признаков
 
-# Input and output
+# Input, output
 SRC_ALL_SKELETONS_TXT = par(cfg["input"]["all_skeletons_txt"])
 DST_PROCESSED_FEATURES = par(cfg["output"]["processed_features"])
 DST_PROCESSED_FEATURES_LABELS = par(cfg["output"]["processed_features_labels"])
 
-# -- Functions
 
 
 def process_features(X0, Y0, video_indices, classes):
-    ''' Process features '''
-    # Convert features
-    # From: raw feature of individual image.
-    # To:   time-serials features calculated from multiple raw features
-    #       of multiple adjacent images, including speed, normalized pos, etc.
+    ''' Обработка характеристик '''
+    #  Преобразование признаков
+    # From: необработанные признаки отдельного изображения.
+    # To:   временные характеристики, рассчитанные из нескольких необработанных характеристик,
+    #       нескольких соседних изображений, включая скорость, нормализованную позицию и т.д.
     ADD_NOISE = False
     if ADD_NOISE:
         X1, Y1 = extract_multi_frame_features(
@@ -61,30 +54,30 @@ def process_features(X0, Y0, video_indices, classes):
         Y = np.concatenate((Y1, Y2))
         return X, Y
     else:
+        print('def_x')
+        print (X0)
         X, Y = extract_multi_frame_features(
             X0, Y0, video_indices, WINDOW_SIZE, 
             is_adding_noise=False, is_print=True)
+
+        print('new_x')
+        print(X)
         return X, Y
 
 # -- Main
 
 
 def main():
-    ''' 
-    Load skeleton data from `skeletons_info.txt`, process data, 
-    and then save features and labels to .csv file.
-    '''
-
-    # Load data
+    # Загрузка данных
     X0, Y0, video_indices = load_skeleton_data(SRC_ALL_SKELETONS_TXT, CLASSES)
 
-    # Process features
+    # Обработка характеристик
     print("\nExtracting time-serials features ...")
     X, Y = process_features(X0, Y0, video_indices, CLASSES)
     print(f"X.shape = {X.shape}, len(Y) = {len(Y)}")
 
-    # Save data
-    print("\nWriting features and labesl to disk ...")
+    # Сохранение
+    print("\nWriting features and labels ...")
 
     os.makedirs(os.path.dirname(DST_PROCESSED_FEATURES), exist_ok=True)
     os.makedirs(os.path.dirname(DST_PROCESSED_FEATURES_LABELS), exist_ok=True)

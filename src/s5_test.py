@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 '''
-Test action recognition on
-(1) a video, (2) a folder of images, (3) or web camera.
+Тестирование распознавания и классивфикации действаий с помощью
+video
+web camera.
 
 Input:
     model: model/trained_classifier.pickle
@@ -14,37 +12,10 @@ Output:
     visualization by cv2.imshow() in img_displayer
 '''
 
-'''
-Example of usage:
-
-(1) Test on video file:
-python src/s5_test.py \
-    --model_path model/trained_classifier.pickle \
-    --data_type video \
-    --data_path data_test/exercise.avi \
-    --output_folder output
-    
-(2) Test on a folder of images:
-python src/s5_test.py \
-    --model_path model/trained_classifier.pickle \
-    --data_type folder \
-    --data_path data_test/apple/ \
-    --output_folder output
-
-(3) Test on web camera:
-python src/s5_test.py \
-    --model_path model/trained_classifier.pickle \
-    --data_type webcam \
-    --data_path 0 \
-    --output_folder output
-    
-'''
-
-
 import numpy as np
 import cv2
 import argparse
-if True:  # Include project path
+if True:
     import sys
     import os
 
@@ -56,22 +27,16 @@ if True:  # Include project path
     from utils.lib_tracker import Tracker
     from utils.lib_tracker import Tracker
     from utils.lib_classifier import ClassifierOnlineTest
-    from utils.lib_classifier import *  # Import all sklearn related libraries
+    from utils.lib_classifier import *
 
 
-    # ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
     ROOT = os.path.dirname(os.path.abspath(__file__))[:-3]
-    #CURR_PATH = ROOT + "/"
     CURR_PATH = ROOT + "src\\"
     sys.path.append(ROOT)
 
-def par(path):  # Pre-Append ROOT to the path if it's not absolute
+def par(path):
     #return ROOT + path if (path and path[0] != "/") else path
     return ROOT
-
-
-# -- Command-line input
-
 
 def get_command_line_arguments():
 
@@ -80,10 +45,10 @@ def get_command_line_arguments():
             description="Test action recognition on \n"
             "(1) a video, (2) a folder of images, (3) or web camera.")
         parser.add_argument("-m", "--model_path", required=False,
-                            default='model/trained_classifier.pickle')
-        parser.add_argument("-t", "--data_type", required=False, default='webcam',
-                            choices=["video", "folder", "webcam"])
-        parser.add_argument("-p", "--data_path", required=False, default="",
+                            default='model/trained_classifier_Random Forest.pickle')
+        parser.add_argument("-t", "--data_type", required=False, default='video',
+                            choices=["video", "webcam"])
+        parser.add_argument("-p", "--data_path", required=False, default="data_test/Scott_actor8.mp4",
                             help="path to a video file, or images folder, or webcam. \n"
                             "For video and folder, the path should be "
                             "absolute or relative to this project's root. "
@@ -104,19 +69,16 @@ def get_command_line_arguments():
 
 
 def get_dst_folder_name(src_data_type, src_data_path):
-    ''' Compute a output folder name based on data_type and data_path.
-        The final output of this script looks like this:
+    ''' Вычисление имени выходной папки на основе data_type и data_path.
+        Окончательный результат выглядит следующим образом:
             DST_FOLDER/folder_name/vidoe.avi
             DST_FOLDER/folder_name/skeletons/XXXXX.txt
     '''
 
-    assert(src_data_type in ["video", "folder", "webcam"])
+    assert(src_data_type in ["video", "webcam"])
 
     if src_data_type == "video":  # /root/data/video.avi --> video
         folder_name = os.path.basename(src_data_path).split(".")[-2]
-
-    elif src_data_type == "folder":  # /root/data/video/ --> video
-        folder_name = src_data_path.rstrip("/").split("/")[-1]
 
     elif src_data_type == "webcam":
         # month-day-hour-minute-seconds, e.g.: 02-26-15-51-12
@@ -133,7 +95,6 @@ SRC_MODEL_PATH = args.model_path
 
 DST_FOLDER_NAME = get_dst_folder_name(SRC_DATA_TYPE, SRC_DATA_PATH)
 
-# -- Settings
 
 cfg_all = lib_commons.read_yaml(ROOT + "config/config.yaml")
 cfg = cfg_all["s5_test.py"]
@@ -141,10 +102,9 @@ cfg = cfg_all["s5_test.py"]
 CLASSES = np.array(cfg_all["classes"])
 SKELETON_FILENAME_FORMAT = cfg_all["skeleton_filename_format"]
 
-# Action recognition: number of frames used to extract features.
 WINDOW_SIZE = int(cfg_all["features"]["window_size"])
 
-# Output folder
+# Папка для результатов
 DST_FOLDER = args.output_folder + "/" + DST_FOLDER_NAME + "/"
 DST_SKELETON_FOLDER_NAME = cfg["output"]["skeleton_folder_name"]
 DST_VIDEO_NAME = cfg["output"]["video_name"]
@@ -152,37 +112,33 @@ DST_VIDEO_NAME = cfg["output"]["video_name"]
 DST_VIDEO_FPS = float(cfg["output"]["video_fps"])
 
 
-# Video setttings
+# Настройки видео
 
-# If data_type is webcam, set the max frame rate.
+# Если data_type - webcam, установим максимальную частоту кадров.
 SRC_WEBCAM_MAX_FPS = float(cfg["settings"]["source"]
                            ["webcam_max_framerate"])
 
-# If data_type is video, set the sampling interval.
-# For example, if it's 3, then the video will be read 3 times faster.
+# Если тип_данных - видео, установим интервал выборки.
+# Например, если он равен 3, то видео будет прочитано в 3 раза быстрее.
 SRC_VIDEO_SAMPLE_INTERVAL = int(cfg["settings"]["source"]
                                 ["video_sample_interval"])
 
-# Openpose settings
+# Настройки Openpose
 OPENPOSE_MODEL = cfg["settings"]["openpose"]["model"]
 OPENPOSE_IMG_SIZE = cfg["settings"]["openpose"]["img_size"]
 
-# Display settings
+# Настройки отображения
 img_disp_desired_rows = int(cfg["settings"]["display"]["desired_rows"])
 
 
-# -- Function
 
 
 def select_images_loader(src_data_type, src_data_path):
     if src_data_type == "video":
         images_loader = lib_images_io.ReadFromVideo(
             src_data_path,
-            sample_interval=SRC_VIDEO_SAMPLE_INTERVAL)
-
-    elif src_data_type == "folder":
-        images_loader = lib_images_io.ReadFromFolder(
-            folder_path=src_data_path)
+            sample_interval=SRC_VIDEO_SAMPLE_INTERVAL
+        )
 
     elif src_data_type == "webcam":
         if src_data_path == "":
@@ -197,47 +153,44 @@ def select_images_loader(src_data_type, src_data_path):
 
 
 class MultiPersonClassifier(object):
-    ''' This is a wrapper around ClassifierOnlineTest
-        for recognizing actions of multiple people.
+    ''' это обертка вокруг ClassifierOnlineTest
+        для распознавания действий нескольких людей.
     '''
 
     def __init__(self, model_path, classes):
 
-        self.dict_id2clf = {}  # human id -> classifier of this person
+        self.dict_id2clf = {}  # human id -> классификатор этого человека
 
-        # Define a function for creating classifier for new people.
+        # Определить функцию для создания классификатора для новых людей.
         self._create_classifier = lambda human_id: ClassifierOnlineTest(
             model_path, classes, WINDOW_SIZE, human_id)
 
     def classify(self, dict_id2skeleton):
-        ''' Classify the action type of each skeleton in dict_id2skeleton '''
+        ''' Классифицировать тип действия каждого скелета в dict_id2skeleton '''
 
-        # Clear people not in view
+        # Очистка людей, не попадающих в поле зрения
         old_ids = set(self.dict_id2clf)
         cur_ids = set(dict_id2skeleton)
         humans_not_in_view = list(old_ids - cur_ids)
         for human in humans_not_in_view:
             del self.dict_id2clf[human]
 
-        # Predict each person's action
+        # Предсказать действие каждого человека
         id2label = {}
         for id, skeleton in dict_id2skeleton.items():
 
-            if id not in self.dict_id2clf:  # add this new person
+            if id not in self.dict_id2clf:  # добавить нового человека
                 self.dict_id2clf[id] = self._create_classifier(id)
 
             classifier = self.dict_id2clf[id]
-            id2label[id] = classifier.predict(skeleton)  # predict label
-            # print("\n\nPredicting label for human{}".format(id))
-            # print("  skeleton: {}".format(skeleton))
-            # print("  label: {}".format(id2label[id]))
+            id2label[id] = classifier.predict(skeleton)  # класс действия
 
         return id2label
 
     def get_classifier(self, id):
-        ''' Get the classifier based on the person id.
-        Arguments:
-            id {int or "min"}
+        ''' Получение классификатора на основе идентификатора человека.
+        Аргументы:
+            id {int или "min"}
         '''
         if len(self.dict_id2clf) == 0:
             return None
@@ -247,7 +200,7 @@ class MultiPersonClassifier(object):
 
 
 def remove_skeletons_with_few_joints(skeletons):
-    ''' Remove bad skeletons before sending to the tracker '''
+    ''' Удалите "плохие" скелеты перед отправкой на трекер '''
     good_skeletons = []
     for skeleton in skeletons:
         px = skeleton[2:2+13*2:2]
@@ -255,45 +208,41 @@ def remove_skeletons_with_few_joints(skeletons):
         num_valid_joints = len([x for x in px if x != 0])
         num_leg_joints = len([x for x in px[-6:] if x != 0])
         total_size = max(py) - min(py)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # IF JOINTS ARE MISSING, TRY CHANGING THESE VALUES:
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if num_valid_joints >= 5 and total_size >= 0.1 and num_leg_joints >= 0:
-            # add this skeleton only when all requirements are satisfied
+            # добавлять этот скелет только тогда, когда все требования выполнены
             good_skeletons.append(skeleton)
     return good_skeletons
 
 
 def draw_result_img(img_disp, ith_img, humans, dict_id2skeleton,
                     skeleton_detector, multiperson_classifier):
-    ''' Draw skeletons, labels, and prediction scores onto image for display '''
+    ''' Отрисовка скелетов, меток и результатов прогнозирования на изображение для отображения на экране '''
 
-    # Resize to a proper size for display
+    # Изменение размера для отображения по конфигурации
     r, c = img_disp.shape[0:2]
     desired_cols = int(1.0 * c * (img_disp_desired_rows / r))
     img_disp = cv2.resize(img_disp,
                           dsize=(desired_cols, img_disp_desired_rows))
 
-    # Draw all people's skeleton
+    # Отрисовка всех скелетов
     skeleton_detector.draw(img_disp, humans)
 
-    # Draw bounding box and label of each person
+    # Отрисовка рамки вокруг скелета
     if len(dict_id2skeleton):
         for id, label in dict_id2label.items():
             skeleton = dict_id2skeleton[id]
-            # scale the y data back to original
+            # вернуть масштаб данных y к исходному значению
             skeleton[1::2] = skeleton[1::2] / scale_h
-            # print("Drawing skeleton: ", dict_id2skeleton[id], "with label:", label, ".")
             lib_plot.draw_action_result(img_disp, id, skeleton, label)
 
-    # Add blank to the left for displaying prediction scores of each class
+    # Добавление слева места для отображения оценок предсказаний каждого класса
     img_disp = lib_plot.add_white_region_to_left_of_image(img_disp)
 
     cv2.putText(img_disp, "Frame:" + str(ith_img),
-                (20, 20), fontScale=1.5, fontFace=cv2.FONT_HERSHEY_PLAIN,
+                (30, 30), fontScale=2, fontFace=cv2.FONT_HERSHEY_PLAIN,
                 color=(0, 0, 0), thickness=2)
 
-    # Draw predicting score for only 1 person
+    # отрисовка предсказанных вероятностей принадлежности классу
     if len(dict_id2skeleton):
         classifier_of_a_person = multiperson_classifier.get_classifier(
             id='min')
@@ -303,9 +252,9 @@ def draw_result_img(img_disp, ith_img, humans, dict_id2skeleton,
 
 def get_the_skeleton_data_to_save_to_disk(dict_id2skeleton):
     '''
-    In each image, for each skeleton, save the:
-        human_id, label, and the skeleton positions of length 18*2.
-    So the total length per row is 2+36=38
+    В каждом изображении, для каждого скелета:
+        human_id, метка, и позиция скелета длиной 18*2.
+    Таким образом, общая длина одного ряда составляет 2+36=38
     '''
     skels_to_save = []
     for human_id in dict_id2skeleton.keys():
@@ -315,77 +264,87 @@ def get_the_skeleton_data_to_save_to_disk(dict_id2skeleton):
     return skels_to_save
 
 
+import tensorflow as tf
+conf = tf.compat.v1.ConfigProto()
+conf.gpu_options.allow_growth = True
+session = tf.compat.v1.Session(config=conf)
+tf.compat.v1.keras.backend.set_session(session)
+
 # -- Main
 if __name__ == "__main__":
 
-    # -- Detector, tracker, classifier
+    # Detector, tracker, classifier
 
     skeleton_detector = SkeletonDetector(OPENPOSE_MODEL, OPENPOSE_IMG_SIZE)
 
-    multiperson_tracker = Tracker()
+    multiperson_tracker = Tracker(max_humans=1)
 
     multiperson_classifier = MultiPersonClassifier(SRC_MODEL_PATH, CLASSES)
 
-    # -- Image reader and displayer
+    # -- Устройство для чтения и отображения изображений
     images_loader = select_images_loader(SRC_DATA_TYPE, SRC_DATA_PATH)
     img_displayer = lib_images_io.ImageDisplayer()
 
     # -- Init output
 
-    # output folder
+    # выходные папки
     os.makedirs(DST_FOLDER, exist_ok=True)
     os.makedirs(DST_FOLDER + DST_SKELETON_FOLDER_NAME, exist_ok=True)
 
-    # video writer
+    # объект класса инструмента для чтения изображений
     video_writer = lib_images_io.VideoWriter(
         DST_FOLDER + DST_VIDEO_NAME, DST_VIDEO_FPS)
 
-    # -- Read images and process
-    try:
-        ith_img = -1
-        while images_loader.has_image():
+    # Чтение из0ображений и детектирование
+    with tf.device('/GPU:0'):
+        try:
+            ith_img = -1
+            while images_loader.has_image():
 
-            # -- Read image
-            img = images_loader.read_image()
-            ith_img += 1
-            img_disp = img.copy()
-            print(f"\nProcessing {ith_img}th image ...")
+                # Чтение
+                img = images_loader.read_image() # читает текущее и назначает следующее, 1 кадр - следующий
+                ith_img += 1
+                img_disp = img.copy()
+                print(f"\nProcessing {ith_img}th image ...")
 
-            # -- Detect skeletons
-            humans = skeleton_detector.detect(img)
-            skeletons, scale_h = skeleton_detector.humans_to_skels_list(humans)
-            skeletons = remove_skeletons_with_few_joints(skeletons)
+                # Детектирование скелетов
+                humans = skeleton_detector.detect(img)
+                for h in humans:
+                    if h.score < 0.5:
+                        humans.remove(h)
+                skeletons, scale_h = skeleton_detector.humans_to_skels_list(humans)
+                skeletons = remove_skeletons_with_few_joints(skeletons)
 
-            # -- Track people
-            dict_id2skeleton = multiperson_tracker.track(
-                skeletons)  # int id -> np.array() skeleton
+                # Трекинг людей
+                dict_id2skeleton = multiperson_tracker.track(
+                    skeletons)  # int id -> np.array() skeleton
 
-            # -- Recognize action of each person
-            if len(dict_id2skeleton):
-                dict_id2label = multiperson_classifier.classify(
+                # -- Предсказание действий для каждого человека
+                if len(dict_id2skeleton):
+                    dict_id2label = multiperson_classifier.classify(
+                        dict_id2skeleton)
+
+                # Отрисовка
+                img_disp = draw_result_img(img_disp, ith_img, humans, dict_id2skeleton,
+                                           skeleton_detector, multiperson_classifier)
+
+                # Лог класса действия
+                if len(dict_id2skeleton):
+                    min_id = min(dict_id2skeleton.keys())
+                    print("prediced label is :", dict_id2label[min_id])
+
+                # -- Вывод итогов
+                img_displayer.display(img_disp, wait_key_ms=1)
+                video_writer.write(img_disp)
+
+                # Получение и сохранения данных по скелетам
+                skels_to_save = get_the_skeleton_data_to_save_to_disk(
                     dict_id2skeleton)
+                lib_commons.save_listlist(
+                    DST_FOLDER + DST_SKELETON_FOLDER_NAME +
+                    SKELETON_FILENAME_FORMAT.format(ith_img),
+                    skels_to_save)
+        finally:
+            video_writer.stop()
+            print("Program ends")
 
-            # -- Draw
-            img_disp = draw_result_img(img_disp, ith_img, humans, dict_id2skeleton,
-                                       skeleton_detector, multiperson_classifier)
-
-            # Print label of a person
-            if len(dict_id2skeleton):
-                min_id = min(dict_id2skeleton.keys())
-                # print("prediced label is :", dict_id2label[min_id])
-                print("prediced label is :", dict_id2label[min_id])
-
-            # -- Display image, and write to video.avi
-            img_displayer.display(img_disp, wait_key_ms=1)
-            video_writer.write(img_disp)
-
-            # -- Get skeleton data and save to file
-            skels_to_save = get_the_skeleton_data_to_save_to_disk(
-                dict_id2skeleton)
-            lib_commons.save_listlist(
-                DST_FOLDER + DST_SKELETON_FOLDER_NAME +
-                SKELETON_FILENAME_FORMAT.format(ith_img),
-                skels_to_save)
-    finally:
-        video_writer.stop()
-        print("Program ends")

@@ -37,6 +37,7 @@ img_w = int(cfg_img_size[1])
 img_h = 656
 img_w = 480
 
+
 def parse_args():
     input_video_path = ROOT+'data\\data_in\\isld_karam_standing_577.avi'
     output_folder_path = ROOT+'data\\data_out\\'
@@ -50,6 +51,7 @@ def parse_args():
     parser.add_argument("-m", "--max_frames", type=int, required=False,
                         default=100000,
                         help="Max number of video frames to save to folder. Default 1e5")
+    parser.add_argument("-f", "--info_file_path", type=str, required=False, default='')
     args = parser.parse_args()
 
     return args
@@ -72,6 +74,7 @@ class ReadFromVideo(object):
         self.next_image = frame
         self.sample_interval = sample_interval
         self.fps = self.get_fps()
+        self.folders = []
         if not self.fps >= 0.0001:
             import warnings
             warnings.warn("Invalid fps of video: {}".format(video_path))
@@ -159,6 +162,7 @@ def main(args):
     # print(video_loader.get_fps())
     # print(video_loader.get_curr_video_time())
 
+
     s = get_max_frame()
     for i in itertools.count():
         img = video_loader.read_image()
@@ -176,7 +180,34 @@ def main(args):
                       "Reach the max_frames setting. Stop.")
                 break
 
-    print(str(args.input_video_path.split('\\')[5].split('_')[2]) + ' ' + str(s+1) + ' ' + str(s+cnt_img))
+    # fold_name = str(args.input_video_path.split('\\')[5].split('_')[2] + '_03')
+    # if video_loader.folders:
+    #     for i in video_loader.folders:
+    #         if i == fold_name:
+    #             continue
+    #         else:
+    #             video_loader.folders.append(fold_name)
+    # else:
+    #     video_loader.folders.append(fold_name)
+
+    # f = open(args.info_file_path, 'r+')
+
+    # with open(args.info_file_path, 'r+') as f:
+    #     for cnt_line, line in enumerate(f):
+    #         if line.find(str(args.input_video_path.split('\\')[5].split('_')[2] + '_03')) != -1:
+    #             f.write('\n' + str(s+1) + ' ' + str(s+cnt_img))
+    #         else:
+    #             continue
+    #     f.close()
+
+    # for line in f:
+    #     if line == str(args.input_video_path.split('\\')[5].split('_')[2] + '_03'):
+    #         f.write('\n' + str(s+1) + ' ' + str(s+cnt_img))
+
+    print(str(args.input_video_path.split('\\')[5].split('_')[2] + '_03') + '\n' + str(s+1) + ' ' + str(s+cnt_img))
+
+
+
 
 
     # with open(VALID_ING_TXT, "a") as file:

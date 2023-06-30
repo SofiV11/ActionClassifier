@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-''' This script does:
-1. Load features and labels from csv files
-2. Train the model
-3. Save the model to `model/` folder.
+'''
+1. Загрузка характеристик и меток из файлов csv
+2. Обучение модели
+3. Сохранение модели в папке `model/`.
 '''
 
 import numpy as np
@@ -14,7 +11,7 @@ import matplotlib.pyplot as plt
 import sklearn.model_selection
 from sklearn.metrics import classification_report
 
-if True:  # Include project path
+if True:
     import sys
     import os
     ROOT = os.path.dirname(os.path.abspath(__file__))+"/../"
@@ -27,11 +24,8 @@ if True:  # Include project path
 
 
 
-def par(path):  # Pre-Append ROOT to the path if it's not absolute
+def par(path):
     return ROOT + path if (path and path[0] != "/") else path
-
-# -- Settings
-
 
 cfg_all = lib_commons.read_yaml(ROOT + "config/config.yaml")
 cfg = cfg_all["s4_train.py"]
@@ -44,20 +38,16 @@ SRC_PROCESSED_FEATURES_LABELS = par(cfg["input"]["processed_features_labels"])
 
 DST_MODEL_PATH = par(cfg["output"]["model_path"])
 
-# -- Functions
-
 def train_test_split(X, Y, ratio_of_test_size):
-    ''' Split training data by ratio '''
+    ''' Разделить учебные данные по соотношению '''
     IS_SPLIT_BY_SKLEARN_FUNC = True
 
-    # Use sklearn.train_test_split
     if IS_SPLIT_BY_SKLEARN_FUNC:
         RAND_SEED = 1
         tr_X, te_X, tr_Y, te_Y = sklearn.model_selection.train_test_split(
             X, Y, test_size=ratio_of_test_size, random_state=RAND_SEED)
 
-    # Make train/test the same.
-    else:
+    else: # Сделать тренировку/тест одинаковыми.
         tr_X = np.copy(X)
         tr_Y = Y.copy()
         te_X = np.copy(X)
@@ -65,9 +55,9 @@ def train_test_split(X, Y, ratio_of_test_size):
     return tr_X, te_X, tr_Y, te_Y
 
 def evaluate_model(model, classes, tr_X, tr_Y, te_X, te_Y):
-    ''' Evaluate accuracy and time cost '''
+    ''' Оценить точность и временные затраты '''
 
-    # Accuracy
+    # Точность
     t0 = time.time()
 
     print(f'Model name: {model.model_name}')
@@ -82,29 +72,26 @@ def evaluate_model(model, classes, tr_X, tr_Y, te_X, te_Y):
     print(classification_report(
         te_Y, te_Y_predict, target_names=classes, output_dict=False))
 
-    # Time cost
+    # Временные затраты
     average_time = (time.time() - t0) / (len(tr_Y) + len(te_Y))
     print("Time cost for predicting one sample: "
           "{:.5f} seconds".format(average_time))
 
-    # Plot accuracy
+    # Матрица ошибок
     axis, cf = lib_plot.plot_confusion_matrix(
         te_Y, te_Y_predict, classes, normalize=False, size=(12, 8))
     plt.show()
 
 
 
-# -- Main
-
-
 def main():
 
-    # -- Load preprocessed data
+    # Загрузка предварительно обработанных данных
     print("\nReading csv files of classes, features, and labels ...")
     X = np.loadtxt(SRC_PROCESSED_FEATURES, dtype=float)  # features
     Y = np.loadtxt(SRC_PROCESSED_FEATURES_LABELS, dtype=int)  # labels
     
-    # -- Train-test split
+    # Разделение на обучающую и тестовую выборку
     tr_X, te_X, tr_Y, te_Y = train_test_split(
         X, Y, ratio_of_test_size=0.3)
     print("\nAfter train-test split:")
@@ -112,17 +99,17 @@ def main():
     print("Number of training samples: ", len(tr_Y))
     print("Number of testing samples:  ", len(te_Y))
 
-    # -- Train the model
+    # Обучение
     print("\nStart training model ...")
-    model = ClassifierOfflineTrain(model_name='AdaBoost')
+    model = ClassifierOfflineTrain(model_name='Nearest Neighbors')
     model.train(tr_X, tr_Y)
 
-    # -- Evaluate model
+    # Оценка
     print("\nStart evaluating model ...")
     evaluate_model(model, CLASSES, tr_X, tr_Y, te_X, te_Y)
 
-    # -- Save model
-    print("\nSave model to " + DST_MODEL_PATH)
+    # Сохранение
+    print("\nSave model to " + DST_MODEL_PATH.format(model.model_name))
     with open(DST_MODEL_PATH.format(model.model_name), 'wb') as f:
         pickle.dump(model, f)
 

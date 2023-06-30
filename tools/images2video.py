@@ -23,14 +23,21 @@ import os
 import csv
 import glob
 import argparse
-ROOT = os.path.dirname(os.path.abspath(__file__))+"/"
+# ROOT = os.path.dirname(os.path.abspath(__file__))+"/"
+ROOT = os.path.dirname(os.path.abspath(__file__))[:-5]
+
+
+img_h = 656
+img_w = 480
 
 
 def parse_args():
+    # input_video_path = ROOT+'data\\data_in\\isld_karam_standing_577.avi'
+    # output_folder_path = ROOT+'data\\data_out\\'
     parser = argparse.ArgumentParser(
         description="Convert a folder of images into a video.")
-    parser.add_argument("-i", "--input_folder_path", type=str, required=True)
-    parser.add_argument("-o", "--output_video_path", type=str, required=True)
+    parser.add_argument("-i", "--input_folder_path", type=str, required=False)
+    parser.add_argument("-o", "--output_video_path", type=str, required=False)
     parser.add_argument("-r", "--framerate", type=int, required=False,
                         default=30)
     parser.add_argument("-s", "--sample_interval", type=int, required=False,
@@ -94,7 +101,7 @@ class VideoWriter(object):
     def write(self, img):
         self.cnt_img += 1
         if self.cnt_img == 1:  # initialize the video writer
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')  # define the codec
+            fourcc = cv2.VideoWriter_fourcc('M','J','P','G')  # define the codec
             self.width = img.shape[1]
             self.height = img.shape[0]
             self.video_writer = cv2.VideoWriter(
@@ -122,19 +129,29 @@ class ImageDisplayer(object):
 
 def main(args):
 
-    images_loader = ReadFromFolder(args.input_folder_path)
-    video_writer = VideoWriter(args.output_video_path, args.framerate)
-    img_displayer = ImageDisplayer()
+    input_dir = ROOT+'data\\tmp\\'
+    output_folder_path = ROOT+'data\\data_in\\add\\'
 
-    N = len(images_loader)
-    i = 0
-    while i < N:
-        print("Processing {}/{}th image".format(i, N))
-        img = images_loader.read_image()
-        if i % args.sample_interval == 0:
-            video_writer.write(img)
-            img_displayer.display(img)
-        i += 1
+    for dirname in os.listdir(input_dir):
+        if os.path.isfile(input_dir + dirname):
+            continue
+        else:
+            images_loader = ReadFromFolder(input_dir + dirname)
+            video_writer = VideoWriter(output_folder_path + dirname.split('-')[0] + '.avi', args.framerate)
+            # img_displayer = ImageDisplayer()
+
+            N = len(images_loader)
+            i = 0
+            while i < N:
+                print("Processing {}/{}th image".format(i, N))
+                img = images_loader.read_image()
+                if i % args.sample_interval == 0:
+                    video_writer.write(img)
+                    # img_displayer.display(img)
+                i += 1
+
+
+
 
 
 if __name__ == "__main__":
